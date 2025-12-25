@@ -15,6 +15,7 @@ const option_list = document.querySelector(".option_list");
 const time_line = document.querySelector("header .time_line");
 const timeText = document.querySelector(".timer .time_left_txt");
 const timeCount = document.querySelector(".timer .timer_sec");
+const timer_control_btn = document.querySelector(".timer_control_btn");
 const inputName = document.getElementById('studentName');
 const nameError = document.getElementById('nameError');
 const review_box = document.querySelector(".review_box");
@@ -33,6 +34,9 @@ let userScore = 0;
 let counter;
 let counterLine;
 let widthValue = 0;
+let isPaused = false;
+let currentTimeLeft = 20;
+let currentLineWidth = 0;
 
 // State needed for navigation
 let currentSubject = null;
@@ -185,6 +189,35 @@ continue_btn.onclick = () => {
     queCounter(1);
     startTimer(20);
     startTimerLine(0);
+
+    // Reset Pause Button State
+    isPaused = false;
+    timer_control_btn.textContent = "Pause";
+    timer_control_btn.disabled = false;
+    timer_control_btn.style.opacity = "1";
+    timer_control_btn.style.cursor = "pointer";
+    timer_control_btn.style.background = "#007bff";
+}
+
+// Timer Control Button Click Event
+if (timer_control_btn) {
+    timer_control_btn.onclick = () => {
+        if (!isPaused) {
+            // Pause logic
+            clearInterval(counter);
+            clearInterval(counterLine);
+            isPaused = true;
+            timer_control_btn.textContent = "Resume";
+            timer_control_btn.style.background = "#28a745"; // Green for Resume
+        } else {
+            // Resume logic
+            startTimer(currentTimeLeft);
+            startTimerLine(currentLineWidth);
+            isPaused = false;
+            timer_control_btn.textContent = "Pause";
+            timer_control_btn.style.background = "#007bff"; // Blue for Pause
+        }
+    }
 }
 
 let next_btn = document.querySelector("footer .next_btn");
@@ -205,6 +238,14 @@ next_btn.onclick = () => {
         timeText.textContent = "Time Left";
         next_btn.classList.remove("show");
         explanation_box.style.display = "none";
+
+        // Reset Pause Button
+        isPaused = false;
+        timer_control_btn.textContent = "Pause";
+        timer_control_btn.style.background = "#007bff";
+        timer_control_btn.disabled = false;
+        timer_control_btn.style.opacity = "1";
+        timer_control_btn.style.cursor = "pointer";
     } else {
         clearInterval(counter);
         clearInterval(counterLine);
@@ -279,6 +320,11 @@ function optionSelected(answer) {
 
     showExplanation();
     next_btn.classList.add("show");
+
+    // Disable Pause Button on answer selection
+    timer_control_btn.disabled = true;
+    timer_control_btn.style.opacity = "0.6";
+    timer_control_btn.style.cursor = "not-allowed";
 }
 
 function showExplanation() {
@@ -319,6 +365,9 @@ function showResult() {
 function startTimer(time) {
     counter = setInterval(timer, 1000);
     function timer() {
+        // Track current time
+        currentTimeLeft = time;
+
         timeCount.textContent = time;
         time--;
         if (time < 9) {
@@ -343,6 +392,11 @@ function startTimer(time) {
 
             showExplanation();
             next_btn.classList.add("show");
+
+            // Disable Pause Button on Time Off
+            timer_control_btn.disabled = true;
+            timer_control_btn.style.opacity = "0.6";
+            timer_control_btn.style.cursor = "not-allowed";
         }
     }
 }
@@ -351,6 +405,9 @@ function startTimerLine(time) {
     counterLine = setInterval(timer, 29);
     function timer() {
         time += 1;
+        // Track current width
+        currentLineWidth = time;
+
         time_line.style.width = time + "px";
         if (time > 549) {
             clearInterval(counterLine);
