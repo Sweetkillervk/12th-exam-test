@@ -22,8 +22,14 @@
     <!-- Selection Box (Subject/Chapter) -->
     <div class="selection_box">
         <header>
-            <div class="title">Select Selection</div>
-            <button class="back_btn"><i class="fas fa-arrow-left"></i></button>
+            <div class="header-top">
+                <button class="back_btn"><i class="fas fa-arrow-left"></i></button>
+                <div class="title">Select Subject</div>
+            </div>
+            <div class="selection_tabs">
+                <button class="tab_btn active" data-mode="chapter">Chapter Wise</button>
+                <button class="tab_btn" data-mode="random">Random Test (30 Q)</button>
+            </div>
         </header>
         <div class="selection_list">
             <!-- Items injected by JS -->
