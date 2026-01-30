@@ -84,12 +84,14 @@
 
         </section>
 
-        <!-- footer of Quiz Box -->
         <footer>
             <div class="total_que">
                 <!-- Question Count inserted from JS -->
             </div>
-            <button class="next_btn">Next Que</button>
+            <div class="footer_btns">
+                <button class="show_answers_btn"><i class="fas fa-eye"></i> All Answers</button>
+                <button class="next_btn">Next Que</button>
+            </div>
         </footer>
     </div>
 
@@ -120,6 +122,21 @@
         </header>
         <div class="review-content">
             <!-- Review items inserted from JS -->
+        </div>
+    </div>
+
+    <!-- Answers Popup Modal -->
+    <div class="answers_popup">
+        <header>
+            <div class="title">Chapter Questions & Answers</div>
+            <button class="close_answers"><i class="fas fa-times"></i></button>
+        </header>
+        <div class="search_container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="answerSearch" placeholder="Search questions..." autocomplete="off">
+        </div>
+        <div class="answers_list">
+            <!-- Questions and answers will be injected here -->
         </div>
     </div>
 
