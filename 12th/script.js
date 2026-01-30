@@ -50,6 +50,10 @@ let currentChapter = null;
 let currentQuestions = [];
 let userAnswers = [];
 
+// Selection mode: 'chapter' or 'random'
+let selectionMode = 'chapter';
+const tab_btns = document.querySelectorAll(".tab_btn");
+
 // Load name from local storage if exists
 const storedName = localStorage.getItem('studentName');
 if (storedName && inputName) inputName.value = storedName;
@@ -63,10 +67,20 @@ if (start_btn) {
     }
 }
 
+// TAB SWITCHING
+tab_btns.forEach(btn => {
+    btn.onclick = () => {
+        tab_btns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectionMode = btn.dataset.mode;
+        renderSubjects();
+    };
+});
+
 function renderSubjects() {
-    selection_title.textContent = "Select Subject";
+    selection_title.textContent = selectionMode === 'chapter' ? "Select Subject" : "Select Subject for Random Test";
     selection_list.innerHTML = "";
-    back_btn.style.display = "none"; // No back button on top level
+    back_btn.style.display = "none";
 
     quizData.forEach((sub, index) => {
         const div = document.createElement("div");
@@ -80,7 +94,11 @@ function renderSubjects() {
         `;
         div.onclick = () => {
             currentSubject = sub;
-            renderChapters(sub);
+            if (selectionMode === 'chapter') {
+                renderChapters(sub);
+            } else {
+                loadRandomSubjectTest(sub);
+            }
         };
         selection_list.appendChild(div);
     });
@@ -156,6 +174,66 @@ function loadQuestionsAndStart(chapter) {
         };
         document.body.appendChild(script);
     }
+}
+
+async function loadRandomSubjectTest(subject) {
+    // Show loading state if needed
+    selection_list.innerHTML = `<div style="text-align:center; padding: 20px; width: 100%; grid-column: 1/-1;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 10px;"></i>
+        <p>Loading questions from all chapters...</p>
+    </div>`;
+
+    let allQuestions = [];
+    if (!window.questionRegistry) window.questionRegistry = {};
+
+    const loadChapter = (chapterId) => {
+        return new Promise((resolve, reject) => {
+            if (window.questionRegistry[chapterId]) {
+                resolve(window.questionRegistry[chapterId]);
+            } else {
+                const script = document.createElement('script');
+                script.src = `questions_data/${chapterId}.js`;
+                script.onload = () => resolve(window.questionRegistry[chapterId]);
+                script.onerror = () => reject(`Could not load ${chapterId}`);
+                document.body.appendChild(script);
+            }
+        });
+    };
+
+    try {
+        const results = await Promise.all(subject.chapters.map(chap => loadChapter(chap.id)));
+        results.forEach(questions => {
+            if (questions) allQuestions = allQuestions.concat(questions);
+        });
+
+        if (allQuestions.length === 0) {
+            alert("No questions found for this subject.");
+            renderSubjects();
+            return;
+        }
+
+        // Shuffle and pick 30
+        currentQuestions = shuffleQuestions(allQuestions).slice(0, 30);
+
+        // Reset IDs/Numbers for the random set
+        currentQuestions.forEach((q, i) => q.numb = i + 1);
+
+        transitionToInfoBox();
+    } catch (err) {
+        console.error(err);
+        alert("Error loading questions. Please try again.");
+        renderSubjects();
+    }
+}
+
+function shuffleQuestions(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex != 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
 }
 
 function transitionToInfoBox() {
@@ -521,9 +599,14 @@ restart_quiz.onclick = () => {
     // Reloading feels abrupt, let's gracefully go back to chapters
     result_box.classList.remove("activeResult");
 
-    // Refresh chapters to show updated score
-    renderChapters(currentSubject);
-    selection_box.classList.add("activeSelection");
+    if (selectionMode === 'random') {
+        // For random mode, we might want to start a NEW random test immediately
+        loadRandomSubjectTest(currentSubject);
+    } else {
+        // Refresh chapters to show updated score
+        renderChapters(currentSubject);
+        selection_box.classList.add("activeSelection");
+    }
 }
 
 quit_quiz.onclick = () => {
