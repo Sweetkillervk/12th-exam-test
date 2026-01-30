@@ -170,8 +170,15 @@ body::after {
     padding: 20px 30px;
     border-bottom: 1px solid var(--glass-border);
     display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.selection_box header .header-top {
+    display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
 }
 
 .selection_box header .title {
@@ -201,6 +208,38 @@ body::after {
 .selection_box .back_btn:hover {
     background: var(--secondary-color);
     transform: translateX(-5px);
+}
+
+.selection_tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px;
+    border-radius: 12px;
+    width: 100%;
+}
+
+.tab_btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.tab_btn.active {
+    background: var(--secondary-color);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(5, 117, 230, 0.3);
+}
+
+.tab_btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
 
 .selection_list {
@@ -941,7 +980,8 @@ footer .show_answers_btn {
     display: flex;
     align-items: center;
     gap: 8px;
-    opacity: 1; /* Always visible in footer */
+    opacity: 1;
+    /* Always visible in footer */
     pointer-events: auto;
 }
 
