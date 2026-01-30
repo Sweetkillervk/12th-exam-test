@@ -23,6 +23,12 @@ const review_btn = document.querySelector(".review-btn");
 const close_review_btn = document.querySelector(".close_review");
 const review_content = document.querySelector(".review-content");
 
+const answers_popup = document.querySelector(".answers_popup");
+const show_answers_btn = document.querySelector(".show_answers_btn");
+const close_answers_btn = document.querySelector(".close_answers");
+const answers_list = document.querySelector(".answers_list");
+const answerSearch = document.getElementById("answerSearch");
+
 const explanation_box = document.querySelector(".explanation-box");
 const explanation_textElement = document.querySelector(".explanation-text");
 
@@ -461,6 +467,50 @@ function generateReview() {
         `;
         review_content.insertAdjacentHTML("beforeend", html);
     });
+}
+
+// Show Answers Logic
+if (show_answers_btn) {
+    show_answers_btn.onclick = () => {
+        answers_popup.classList.add("activeAnswers");
+        renderAllAnswers();
+        answerSearch.value = ""; // Clear search on open
+    }
+}
+
+if (close_answers_btn) {
+    close_answers_btn.onclick = () => {
+        answers_popup.classList.remove("activeAnswers");
+    }
+}
+
+function renderAllAnswers(filter = "") {
+    answers_list.innerHTML = "";
+    const filteredQuestions = currentQuestions.filter(q =>
+        q.question.toLowerCase().includes(filter.toLowerCase()) ||
+        q.answer.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    filteredQuestions.forEach((q, index) => {
+        let html = `
+        <div class="ans-item">
+            <div class="ans-q">${q.numb || (index + 1)}. ${q.question}</div>
+            <div class="ans-a">Ans: ${q.answer}</div>
+        </div>
+        `;
+        answers_list.insertAdjacentHTML("beforeend", html);
+    });
+
+    if (filteredQuestions.length === 0) {
+        answers_list.innerHTML = `<div style="text-align:center; padding: 20px; color: rgba(255,255,255,0.5);">No matching questions found.</div>`;
+    }
+}
+
+// Live Search logic
+if (answerSearch) {
+    answerSearch.oninput = (e) => {
+        renderAllAnswers(e.target.value);
+    }
 }
 
 // Restart Logic
